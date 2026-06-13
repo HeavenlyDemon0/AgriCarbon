@@ -1,2 +1,0 @@
-src/App.tsx(48,9): error TS6133: 'location' is declared but its value is never read.
-src/pages/FarmPage.tsx(3,1): error TS6133: 'useNavigate' is declared but its value is never read.
