@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
-import { apiFetch } from '../api/client';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
 
 type UserProfile = {
   id: string;
@@ -17,63 +17,59 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-type AuthResponse = {
-  token: string;
-  user: UserProfile;
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('agri_user');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [user, setUser] = useState<UserProfile | null>(null);
 
-  const isAuthenticated = !!user;
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchProfile(session.user);
+      }
+    });
 
-  const persistSession = useCallback((token: string, profile: UserProfile) => {
-    localStorage.setItem('agri_token', token);
-    localStorage.setItem('agri_user', JSON.stringify(profile));
-    setUser(profile);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchProfile(session.user);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    if (!email) return false;
-
-    try {
-      const data = await apiFetch<AuthResponse>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
-      persistSession(data.token, data.user);
-      return true;
-    } catch {
-      return false;
+  const fetchProfile = async (authUser: any) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .single();
+    
+    if (data) {
+      setUser({ id: data.id, name: data.name, email: data.email });
     }
-  }, [persistSession]);
+  };
+
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return !error;
+  }, []);
 
   const signup = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
-    if (!email || !name) return false;
-
-    try {
-      const data = await apiFetch<AuthResponse>('/auth/signup', {
-        method: 'POST',
-        body: JSON.stringify({ name, email, password }),
-      });
-      persistSession(data.token, data.user);
-      return true;
-    } catch {
-      return false;
-    }
-  }, [persistSession]);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } }
+    });
+    return !error;
+  }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('agri_token');
-    localStorage.removeItem('agri_user');
-    setUser(null);
+    supabase.auth.signOut();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, signup, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated: !!user, user, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { supabase } from '../lib/supabase';
 
 export interface Recommendation {
   id: string;
@@ -16,13 +16,51 @@ export interface Recommendation {
 }
 
 export async function getTodayRecommendation(): Promise<Recommendation> {
-  return apiFetch<Recommendation>('/recommendations/today');
+  const { data, error } = await supabase
+    .from('recommendations')
+    .select('*')
+    .eq('timeframe', 'today')
+    .single();
+
+  if (error) throw error;
+  return mapRecommendation(data);
 }
 
 export async function getWeeklyPlan(): Promise<Recommendation[]> {
-  return apiFetch<Recommendation[]>('/recommendations/weekly');
+  const { data, error } = await supabase
+    .from('recommendations')
+    .select('*')
+    .eq('timeframe', 'week')
+    .order('sort_order');
+
+  if (error) throw error;
+  return data.map(mapRecommendation);
 }
 
 export async function getSeasonalPlan(): Promise<Recommendation[]> {
-  return apiFetch<Recommendation[]>('/recommendations/seasonal');
+  const { data, error } = await supabase
+    .from('recommendations')
+    .select('*')
+    .eq('timeframe', 'season')
+    .order('sort_order');
+
+  if (error) throw error;
+  return data.map(mapRecommendation);
+}
+
+function mapRecommendation(row: any): Recommendation {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    rationale: row.rationale,
+    cost: row.cost,
+    benefit: row.benefit,
+    risk: row.risk,
+    costIcon: row.cost_icon,
+    benefitIcon: row.benefit_icon,
+    riskIcon: row.risk_icon,
+    priority: row.priority,
+    timeframe: row.timeframe,
+  };
 }

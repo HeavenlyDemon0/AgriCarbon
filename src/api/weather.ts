@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { supabase } from '../lib/supabase';
 
 export interface WeatherData {
   temp: number;
@@ -20,9 +20,38 @@ export interface Alert {
 }
 
 export async function getWeather(): Promise<WeatherData> {
-  return apiFetch<WeatherData>('/weather');
+  const { data, error } = await supabase
+    .from('weather_snapshots')
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  
+  return {
+    temp: data.temp,
+    condition: data.condition,
+    humidity: data.humidity,
+    windSpeed: data.wind_speed,
+    icon: data.icon,
+    description: data.description,
+  };
 }
 
 export async function getAlerts(): Promise<Alert[]> {
-  return apiFetch<Alert[]>('/alerts');
+  const { data, error } = await supabase
+    .from('alerts')
+    .select('*')
+    .order('timestamp', { ascending: false });
+
+  if (error) throw error;
+  
+  return data.map(row => ({
+    id: row.id,
+    type: row.type,
+    severity: row.severity,
+    title: row.title,
+    description: row.description,
+    timestamp: row.timestamp,
+    icon: row.icon,
+  }));
 }

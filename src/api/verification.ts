@@ -1,4 +1,5 @@
-import { apiFetch } from './client';
+import { supabase } from '../lib/supabase';
+import { getFarmData } from './farms';
 
 export interface VerificationSubmission {
   image: File | null;
@@ -9,7 +10,7 @@ export interface VerificationSubmission {
 export interface VerificationResult {
   success: boolean;
   message: string;
-  creditsAwarded: number;
+  creditsAwarded: int;
 }
 
 export const practiceTypes = [
@@ -23,20 +24,67 @@ export const practiceTypes = [
   { value: 'other', label: 'Other', icon: '📋' },
 ];
 
+const CREDITS_BY_PRACTICE: Record<string, number> = {
+  mulching: 3,
+  drip: 5,
+  compost: 4,
+  'zero-till': 15,
+  'tree-planting': 8,
+  'crop-rotation': 12,
+  'residue-mgmt': 6,
+  other: 2,
+};
+
 export async function submitVerification(
   data: VerificationSubmission,
 ): Promise<VerificationResult> {
-  if (!data.image) {
-    throw new Error('Image is required');
-  }
+  if (!data.image) throw new Error('Image is required');
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
 
-  const form = new FormData();
-  form.append('image', data.image);
-  form.append('practice_type', data.practiceType);
-  form.append('voice_confirmed', String(data.voiceConfirmed));
+  const farm = await getFarmData();
+  const credits = CREDITS_BY_PRACTICE[data.practiceType] || 0;
 
-  return apiFetch<VerificationResult>('/verification', {
-    method: 'POST',
-    body: form,
+  // Upload image
+  const fileExt = data.image.name.split('.').pop();
+  const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+  const { error: uploadError } = await supabase.storage
+    .from('verification-images')
+    .upload(fileName, data.image);
+    
+  if (uploadError) throw uploadError;
+
+  // Insert submission
+  const { error: insertError } = await supabase
+    .from('verification_submissions')
+    .insert({
+      user_id: user.id,
+      farm_id: farm.id,
+      practice_type: data.practiceType,
+      voice_confirmed: data.voiceConfirmed,
+      image_path: fileName,
+      status: 'pending',
+      credits_awarded: credits,
+    });
+  if (insertError) throw insertError;
+
+  // Insert transaction
+  const practiceLabel = practiceTypes.find(p => p.value === data.practiceType)?.label || data.practiceType;
+  const icon = practiceTypes.find(p => p.value === data.practiceType)?.icon || '📋';
+  
+  await supabase.from('credit_transactions').insert({
+    user_id: user.id,
+    farm_id: farm.id,
+    type: 'pending',
+    description: `${practiceLabel} — Under Review`,
+    credits: credits,
+    icon: icon,
   });
+
+  return {
+    success: true,
+    message: 'Practice verified successfully!',
+    creditsAwarded: credits,
+  };
 }

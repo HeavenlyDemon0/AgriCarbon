@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { supabase } from '../lib/supabase';
 
 export interface Farm {
   id: string;
@@ -21,9 +21,45 @@ export interface ImpactData {
 }
 
 export async function getFarmData(): Promise<Farm> {
-  return apiFetch<Farm>('/farm');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('farms')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
+
+  if (error) throw error;
+  
+  return {
+    id: data.id,
+    name: data.name,
+    location: data.location,
+    area: data.area,
+    crop: data.crop,
+    soilType: data.soil_type,
+    season: data.season,
+    icon: data.icon,
+  };
 }
 
 export async function getImpactData(): Promise<ImpactData[]> {
-  return apiFetch<ImpactData[]>('/farm/impact');
+  const farm = await getFarmData();
+
+  const { data, error } = await supabase
+    .from('impact_metrics')
+    .select('*')
+    .eq('farm_id', farm.id);
+
+  if (error) throw error;
+  
+  return data.map(item => ({
+    metric: item.metric,
+    before: item.before_value,
+    after: item.after_value,
+    unit: item.unit,
+    icon: item.icon,
+    improvement: item.improvement,
+  }));
 }
