@@ -1,61 +1,58 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLang } from '../context/LanguageContext';
 import { getAlerts, type Alert } from '../api/weather';
 
-const severityColors: Record<string, string> = {
-  critical: 'bg-danger-500/10 border-danger-400 text-danger-600',
-  high: 'bg-danger-400/10 border-danger-400/50 text-danger-500',
-  medium: 'bg-sun-300/20 border-sun-400/40 text-earth-700',
-  low: 'bg-sky-50 border-sky-200 text-sky-700',
-};
-
 export default function AlertsPage() {
-  const { t } = useLang();
-  const navigate = useNavigate();
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [expanded, setExpanded] = useState<string | null>(null);
-
   useEffect(() => { getAlerts().then(setAlerts); }, []);
 
+  const severityMap: Record<string, { bg: string; text: string; border: string }> = {
+    critical: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' },
+    high: { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/20' },
+    medium: { bg: 'bg-yellow-500/10', text: 'text-yellow-400', border: 'border-yellow-500/20' },
+    low: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
+  };
+
   return (
-    <div className="page-enter pb-24">
-      <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-earth-500 font-semibold text-sm hover:text-leaf-600 transition-colors py-2">
-          ← {t('common.back')}
-        </button>
+    <div className="animate-fade-in-up space-y-6 pb-20">
+      <div>
+        <h1 className="text-3xl font-bold text-white">Risk & Environmental Alerts</h1>
+        <p className="text-sm text-gray-500 mt-1">Real-time hazard notifications and mitigation advisories.</p>
+      </div>
 
-        <h1 className="text-2xl font-black text-earth-800">⚠️ {t('dash.weather')}</h1>
-
-        <div className="space-y-3">
-          {alerts.map((alert, i) => (
-            <div
-              key={alert.id}
-              className={`glass-card border-l-4 ${severityColors[alert.severity]} p-4 animate-slide-up cursor-pointer active:scale-[0.98] transition-transform`}
-              style={{ animationDelay: `${i * 80}ms` }}
-              onClick={() => setExpanded(expanded === alert.id ? null : alert.id)}
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-3xl">{alert.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className={`text-[0.6rem] font-bold uppercase px-2 py-0.5 rounded-full ${severityColors[alert.severity]}`}>
-                      {alert.severity}
-                    </span>
-                    <span className="text-xs text-earth-400">
-                      {new Date(alert.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-earth-800">{alert.title}</h3>
-                  {expanded === alert.id && (
-                    <p className="text-sm text-earth-600 leading-relaxed mt-2 animate-fade-in">{alert.description}</p>
-                  )}
-                </div>
-                <span className={`text-earth-300 transition-transform duration-200 ${expanded === alert.id ? 'rotate-90' : ''}`}>›</span>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="glass-panel overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] uppercase tracking-widest text-gray-500">
+              <th className="px-6 py-4 font-semibold w-16">Env</th>
+              <th className="px-6 py-4 font-semibold">Severity</th>
+              <th className="px-6 py-4 font-semibold w-1/2">Advisory</th>
+              <th className="px-6 py-4 font-semibold text-right">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {alerts.map((alert) => {
+              const map = severityMap[alert.severity] || severityMap.low;
+              return (
+                <tr key={alert.id} className="hover:bg-white/[0.03] transition-colors">
+                  <td className="px-6 py-5 text-3xl">{alert.icon}</td>
+                  <td className="px-6 py-5">
+                    <span className={`inline-block px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest rounded border mb-2 ${map.bg} ${map.text} ${map.border}`}>{alert.severity}</span>
+                    <p className="text-[10px] text-gray-600 font-mono">
+                      {new Date(alert.timestamp).toLocaleDateString()} {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </td>
+                  <td className="px-6 py-5">
+                    <p className="text-sm font-bold text-white mb-1">{alert.title}</p>
+                    <p className="text-sm text-gray-500 leading-relaxed">{alert.description}</p>
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                    <button className="btn-secondary py-1 text-xs">Acknowledge</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );

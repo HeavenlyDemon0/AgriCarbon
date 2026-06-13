@@ -1,156 +1,114 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLang } from '../context/LanguageContext';
-import FloatingLeaf from '../components/FloatingLeaf';
-
-function DemoModal({ onClose }: { onClose: () => void }) {
-  const { t } = useLang();
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-      <div
-        className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[85vh] overflow-y-auto p-6 animate-bounce-in"
-        onClick={e => e.stopPropagation()}
-      >
-        <button onClick={onClose} className="absolute top-3 right-3 text-2xl text-earth-400 hover:text-earth-600 transition-colors">✕</button>
-        <h2 className="text-xl font-bold text-earth-800 mb-1">🌾 Demo: Green Valley Farm</h2>
-        <p className="text-sm text-earth-400 mb-4">See how AgriCarbon works for a sample farm</p>
-
-        {/* Demo Farm */}
-        <div className="glass-card p-4 mb-3">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-3xl">🌾</span>
-            <div>
-              <p className="font-bold text-earth-800">Green Valley Farm</p>
-              <p className="text-xs text-earth-400">Warangal, Telangana · 5 Acres · Rice</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Demo Recommendation */}
-        <div className="bg-gradient-to-br from-leaf-50 to-sky-50 rounded-xl p-4 mb-3 border border-leaf-200">
-          <p className="text-xs font-bold text-leaf-600 mb-1">📋 {t('dash.today')}</p>
-          <p className="font-bold text-earth-800 mb-2">Apply Organic Mulching</p>
-          <div className="flex gap-3 text-sm">
-            <span className="bg-white/80 px-2 py-1 rounded-lg">💰 ₹200</span>
-            <span className="bg-white/80 px-2 py-1 rounded-lg">🌱 +3 Credits</span>
-            <span className="bg-white/80 px-2 py-1 rounded-lg">✅ Low Risk</span>
-          </div>
-        </div>
-
-        {/* Demo Wallet */}
-        <div className="bg-gradient-to-br from-sun-300/20 to-sun-400/10 rounded-xl p-4 mb-3 border border-sun-300/30">
-          <p className="text-xs font-bold text-earth-600 mb-1">💰 Carbon Wallet</p>
-          <div className="flex justify-between text-sm">
-            <span><strong className="text-2xl text-leaf-600">45</strong> Earned</span>
-            <span><strong className="text-2xl text-sun-500">12</strong> Pending</span>
-            <span><strong className="text-2xl text-sky-500">8</strong> Redeemed</span>
-          </div>
-        </div>
-
-        {/* Demo Impact */}
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {[
-            { label: 'Water Saved', value: '35%', icon: '💧', color: 'bg-sky-50 text-sky-700' },
-            { label: 'Cost Saved', value: '₹3,500', icon: '💰', color: 'bg-sun-300/20 text-earth-700' },
-            { label: 'Soil Score', value: '72/100', icon: '🌍', color: 'bg-leaf-50 text-leaf-700' },
-            { label: 'CO₂ Captured', value: '2.4t', icon: '🌱', color: 'bg-leaf-100 text-leaf-800' },
-          ].map(item => (
-            <div key={item.label} className={`${item.color} rounded-xl p-3 text-center`}>
-              <span className="text-xl">{item.icon}</span>
-              <p className="font-bold text-lg">{item.value}</p>
-              <p className="text-xs">{item.label}</p>
-            </div>
-          ))}
-        </div>
-
-        <button onClick={onClose} className="btn-primary w-full">{t('landing.getStarted')} →</button>
-      </div>
-    </div>
-  );
-}
+import { Link } from 'react-router-dom';
 
 export default function LandingPage() {
-  const { t } = useLang();
-  const navigate = useNavigate();
-  const [showDemo, setShowDemo] = useState(false);
+  const scrollToFeatures = () => {
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Hero */}
-      <section className="relative flex-1 flex flex-col items-center justify-center px-6 py-16 text-center overflow-hidden"
-        style={{
-          background: 'linear-gradient(170deg, #1a4731 0%, #2d5a3f 20%, #3e6b4e 40%, #5a7d5f 60%, #8b9e6b 80%, #c4b68a 100%)',
-        }}
-      >
-        {/* Texture overlay */}
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-        }} />
+    <div className="min-h-screen bg-agri-bg text-white font-sans overflow-x-hidden selection:bg-agri-emerald selection:text-white">
+      {/* Background Animated Glows */}
+      <div className="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-agri-emerald/10 blur-[150px] rounded-full pointer-events-none"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-cyan-900/10 blur-[150px] rounded-full pointer-events-none"></div>
 
-        {/* Floating Leaf */}
-        <div className="mb-6">
-          <FloatingLeaf />
+      {/* Navbar */}
+      <nav className="relative z-50 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl font-black text-agri-emerald" style={{textShadow: '0 0 20px rgba(16,185,129,0.5)'}}>A.</span>
+          <span className="text-xl font-bold tracking-tight">AgriCarbon</span>
         </div>
-
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white max-w-2xl leading-tight mb-4 animate-slide-up drop-shadow-lg">
-          {t('landing.headline')}
-        </h1>
-
-        <p className="text-base sm:text-lg text-leaf-100 max-w-md mb-8 animate-slide-up delay-200 leading-relaxed">
-          {t('landing.subtext')}
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 animate-slide-up delay-300">
-          <button
-            onClick={() => navigate('/signin')}
-            className="btn-primary text-lg px-8 py-4 shadow-xl hover:shadow-2xl"
-          >
-            🚀 {t('landing.getStarted')}
-          </button>
-          <button
-            onClick={() => setShowDemo(true)}
-            className="bg-white/15 hover:bg-white/25 text-white font-bold px-8 py-4 rounded-2xl text-lg backdrop-blur-sm border border-white/20 transition-all duration-200 hover:-translate-y-0.5"
-          >
-            👁️ {t('landing.seeDemo')}
-          </button>
+        <div className="flex items-center gap-6">
+          <Link to="/signin" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors">Sign In</Link>
+          <Link to="/signup" className="text-sm font-bold bg-white text-black px-6 py-2.5 rounded-xl hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            Start Free
+          </Link>
         </div>
+      </nav>
 
-        {/* Wave divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 60L48 55C96 50 192 40 288 42C384 44 480 58 576 65C672 72 768 72 864 65C960 58 1056 44 1152 40C1248 36 1344 42 1392 45L1440 48V120H1392C1344 120 1248 120 1152 120C1056 120 960 120 864 120C768 120 672 120 576 120C480 120 384 120 288 120C192 120 96 120 48 120H0V60Z" fill="#f0fdf4"/>
-          </svg>
+      {/* Hero Section */}
+      <section className="relative z-10 pt-32 pb-24 px-6">
+        <div className="max-w-5xl mx-auto text-center border border-white/5 bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] p-12 shadow-2xl relative overflow-hidden">
+          {/* Internal Glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-agri-emerald to-transparent opacity-50"></div>
+          
+          <div className="inline-block px-4 py-1.5 rounded-full border border-agri-emerald/20 bg-agri-emerald/5 text-agri-emerald text-xs font-bold mb-8 uppercase tracking-widest animate-fade-in-up">
+            AI-Driven Precision Agriculture
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-8 animate-fade-in-up" style={{animationDelay: '100ms'}}>
+            Turn soil data into <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-agri-emerald to-cyan-400">Yield & Capital.</span>
+          </h1>
+          <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay: '200ms'}}>
+            The only platform bridging the gap between field sensors, machine learning agronomy, and global carbon exchanges.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up" style={{animationDelay: '300ms'}}>
+            <Link to="/signup" className="btn-primary text-lg px-8 py-4 w-full sm:w-auto shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)]">
+              Initialize Dashboard
+            </Link>
+            <button onClick={scrollToFeatures} className="text-lg px-8 py-4 font-semibold text-gray-300 hover:text-white transition-all w-full sm:w-auto bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 flex items-center justify-center gap-2">
+              Explore Platform <span>↓</span>
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* Benefits */}
-      <section className="px-6 py-12 max-w-4xl mx-auto w-full">
-        <div className="grid sm:grid-cols-3 gap-4">
-          {[
-            { key: '1', icon: '💎', gradient: 'from-leaf-50 to-leaf-100', border: 'border-leaf-200' },
-            { key: '2', icon: '🧠', gradient: 'from-sky-50 to-sky-100', border: 'border-sky-200' },
-            { key: '3', icon: '⛅', gradient: 'from-sun-300/10 to-sun-400/10', border: 'border-sun-300/30' },
-          ].map((card, i) => (
-            <div
-              key={card.key}
-              className={`glass-card bg-gradient-to-br ${card.gradient} border ${card.border} p-6 text-center animate-slide-up`}
-              style={{ animationDelay: `${(i + 1) * 150}ms` }}
-            >
-              <span className="text-4xl mb-3 inline-block">{card.icon}</span>
-              <h3 className="text-lg font-bold text-earth-800 mb-1">{t(`landing.benefit${card.key}.title`)}</h3>
-              <p className="text-sm text-earth-500 leading-relaxed">{t(`landing.benefit${card.key}.desc`)}</p>
+      {/* ── BENTO GRID FEATURES ── */}
+      <section id="features" className="relative z-10 py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Enterprise Grade Capabilities</h2>
+            <p className="text-gray-400">Everything needed to monitor, execute, and monetize.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
+            {/* Box 1 (Large) */}
+            <div className="md:col-span-2 glass-panel p-8 relative overflow-hidden group">
+               <div className="absolute inset-0 bg-gradient-to-br from-agri-emerald/5 to-transparent z-0 transition-opacity opacity-0 group-hover:opacity-100"></div>
+               <div className="relative z-10">
+                 <div className="w-12 h-12 bg-agri-emerald/20 border border-agri-emerald/30 rounded-lg flex items-center justify-center text-agri-emerald mb-6 text-xl">📡</div>
+                 <h3 className="text-2xl font-bold mb-2">Live Satellite Sync</h3>
+                 <p className="text-gray-400 max-w-sm">Direct NDVI and hardware sensor integrations piping real-time data seamlessly into your operational hub.</p>
+               </div>
+               {/* Decorative Abstract Map lines */}
+               <div className="absolute right-0 bottom-0 w-64 h-64 border-t border-l border-white/5 rounded-tl-[100%] opacity-20"></div>
+               <div className="absolute right-0 bottom-0 w-48 h-48 border-t border-l border-white/10 rounded-tl-[100%] opacity-30"></div>
             </div>
-          ))}
+
+            {/* Box 2 (Tall) */}
+            <div className="md:row-span-2 glass-panel p-8 relative overflow-hidden group flex flex-col items-center justify-center text-center">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utb3BhY2l0eT0iMC4wMyIgZmlsbD0ibm9uZSI+PHBhdGggZD0iTTAgNjBoNjBNNjAgMEwwIDYwIi8+PC9nPjwvc3ZnPg==')] opacity-50 transition-transform group-hover:scale-110"></div>
+              <div className="relative z-10">
+                <div className="text-6xl mb-6">📈</div>
+                <h3 className="text-2xl font-bold mb-2">Carbon Ledger</h3>
+                <p className="text-gray-400">Blockchain-verified ledger tracking absolute compliance for exchange trading.</p>
+              </div>
+            </div>
+
+            {/* Box 3 */}
+            <div className="glass-panel p-8 relative overflow-hidden group">
+               <div className="relative z-10">
+                 <h3 className="text-xl font-bold mb-2 text-agri-emerald">Hardware Agnostic</h3>
+                 <p className="text-gray-400 text-sm">Connects to John Deere, Trimble, and ClimateFieldView simultaneously.</p>
+               </div>
+            </div>
+
+            {/* Box 4 */}
+            <div className="glass-panel p-8 relative overflow-hidden group bg-gradient-to-t from-black/50 to-transparent">
+               <div className="relative z-10">
+                 <h3 className="text-xl font-bold mb-2">AI Execution Planner</h3>
+                 <p className="text-gray-400 text-sm">LLM models built on highly trained agricultural yield datasets to optimize decisions daily.</p>
+               </div>
+            </div>
+
+          </div>
         </div>
       </section>
-
+      
       {/* Footer */}
-      <footer className="text-center py-6 text-xs text-earth-400 border-t border-earth-100">
-        <p>🌱 AgriCarbon · Empowering Farmers, Healing the Planet</p>
+      <footer className="py-8 text-center text-gray-600 text-sm border-t border-white/5 relative z-10 bg-black/20">
+        &copy; 2026 AgriCarbon Inc. All Rights Reserved. Not a real product. V3 Showcase.
       </footer>
-
-      {showDemo && <DemoModal onClose={() => setShowDemo(false)} />}
     </div>
   );
 }

@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useLang } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 
 export default function SignInPage() {
-  const { t } = useLang();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -14,90 +12,59 @@ export default function SignInPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    if (!email || !password) { setError('Please fill in all fields'); return; }
+    if (!email || !password) { setError('All fields required'); return; }
     setLoading(true);
-    try {
-      await login(email, password);
+    const ok = await login(email, password);
+    setLoading(false);
+    if (ok) {
       navigate('/home');
-    } catch {
-      setError('Login failed. Please try again.');
-    } finally {
-      setLoading(false);
+    } else {
+      setError('Invalid credentials');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12"
-      style={{ background: 'linear-gradient(160deg, #f0fdf4 0%, #e0f2fe 50%, #fdf8f0 100%)' }}
-    >
-      <div className="w-full max-w-sm animate-bounce-in">
-        {/* Logo */}
+    <div className="min-h-screen flex items-center justify-center bg-agri-bg font-sans relative overflow-hidden">
+      {/* Deep Space Background Effects */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-5 mix-blend-screen scale-110 blur-sm pointer-events-none"></div>
+      <div className="absolute w-[600px] h-[600px] bg-agri-emerald/10 blur-[150px] rounded-full pointer-events-none"></div>
+
+      <div className="w-full max-w-md glass-panel p-10 z-10 text-white shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-white/10 animate-fade-in-up">
+        
         <div className="text-center mb-8">
-          <div className="inline-block text-5xl mb-3 animate-float">🌱</div>
-          <h1 className="text-2xl font-black text-earth-800">{t('auth.welcome')}</h1>
-          <p className="text-sm text-earth-400 mt-1">AgriCarbon</p>
+          <Link to="/" className="inline-block text-4xl text-agri-emerald font-black mb-4 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]">A.</Link>
+          <h2 className="text-2xl font-bold tracking-tight">Access Control</h2>
+          <p className="text-gray-400 text-sm mt-2">Initialize your agricultural dashboard.</p>
         </div>
 
-        {/* Card */}
-        <form onSubmit={handleSubmit} className="glass-card p-8 shadow-xl">
-          <h2 className="text-xl font-bold text-earth-800 mb-6 text-center">{t('auth.signIn')}</h2>
+        {error && <div className="p-3 bg-red-900/30 border border-red-500/30 text-red-400 rounded-lg text-sm mb-6 font-semibold text-center">{error}</div>}
 
-          {error && (
-            <div className="bg-danger-400/10 text-danger-600 text-sm px-4 py-2 rounded-xl mb-4 font-medium text-center">
-              ⚠️ {error}
-            </div>
-          )}
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-earth-600 mb-1.5">{t('auth.email')}</label>
-              <input
-                type="text"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="farmer@example.com"
-                className="w-full px-4 py-3.5 rounded-xl border border-earth-200 bg-white/80 text-earth-800 text-base focus:outline-none focus:ring-2 focus:ring-leaf-400 focus:border-transparent transition-all placeholder:text-earth-300"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-earth-600 mb-1.5">{t('auth.password')}</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3.5 rounded-xl border border-earth-200 bg-white/80 text-earth-800 text-base focus:outline-none focus:ring-2 focus:ring-leaf-400 focus:border-transparent transition-all placeholder:text-earth-300"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Email Hash</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="input-field py-3 text-sm bg-white/5 border-white/10 focus:bg-agri-emerald/10" placeholder="enter identity email" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Security Key</label>
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="input-field py-3 text-sm bg-white/5 border-white/10 focus:bg-agri-emerald/10" placeholder="••••••••" />
+          </div>
+          
+          <div className="flex items-center justify-between pt-2">
+            <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+              <input type="checkbox" className="rounded bg-black/20 border-white/20 text-agri-emerald focus:ring-agri-emerald" />
+              Keep session active
+            </label>
+            <a href="#" className="text-xs text-agri-emerald hover:text-white transition-colors">Reset Key</a>
           </div>
 
-          <div className="text-right mt-2">
-            <a href="#" className="text-sm text-leaf-600 font-semibold hover:text-leaf-700 transition-colors">
-              {t('auth.forgot')}
-            </a>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full mt-6 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <span className="inline-block animate-spin">⏳</span>
-            ) : (
-              <>{t('auth.signIn')} →</>
-            )}
+          <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 mt-4 text-sm tracking-wide">
+            {loading ? 'Authenticating...' : 'Sign In →'}
           </button>
-
-          <p className="text-center text-sm text-earth-400 mt-4">
-            {t('auth.noAccount')}{' '}
-            <Link to="/signin" className="text-leaf-600 font-bold hover:text-leaf-700 transition-colors">
-              {t('auth.signUp')}
-            </Link>
-          </p>
         </form>
+
+        <p className="text-center text-xs text-gray-500 mt-8">
+          No profile found? <Link to="/signup" className="text-white hover:text-agri-emerald font-bold transition-colors">Initialize a new instance</Link>
+        </p>
       </div>
     </div>
   );

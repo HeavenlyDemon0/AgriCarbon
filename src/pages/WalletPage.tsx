@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLang } from '../context/LanguageContext';
 import { getWalletData, getTransactions, type WalletData, type Transaction } from '../api/wallet';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function WalletPage() {
-  const { t } = useLang();
-  const navigate = useNavigate();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
@@ -16,79 +12,99 @@ export default function WalletPage() {
   }, []);
 
   const chartData = [
-    { name: t('wallet.earned'), value: wallet?.earned ?? 0, color: '#12cf5a' },
-    { name: t('wallet.pending'), value: wallet?.pending ?? 0, color: '#facc15' },
-    { name: t('wallet.redeemed'), value: wallet?.redeemed ?? 0, color: '#38bdf8' },
+    { name: 'Earned', value: wallet?.earned ?? 0, color: '#10B981' },
+    { name: 'Pending', value: wallet?.pending ?? 0, color: '#F59E0B' },
+    { name: 'Redeemed', value: wallet?.redeemed ?? 0, color: '#06B6D4' },
   ];
 
   return (
-    <div className="page-enter pb-24">
-      <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-earth-500 font-semibold text-sm hover:text-leaf-600 transition-colors py-2">
-          ← {t('common.back')}
-        </button>
-
-        <h1 className="text-2xl font-black text-earth-800">💰 {t('dash.wallet')}</h1>
-
-        {/* Credit Summary */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: t('wallet.earned'), value: wallet?.earned ?? 0, icon: '✅', bg: 'bg-leaf-50 border-leaf-200', text: 'text-leaf-600' },
-            { label: t('wallet.pending'), value: wallet?.pending ?? 0, icon: '⏳', bg: 'bg-sun-300/10 border-sun-300/30', text: 'text-sun-500' },
-            { label: t('wallet.redeemed'), value: wallet?.redeemed ?? 0, icon: '🎁', bg: 'bg-sky-50 border-sky-200', text: 'text-sky-600' },
-          ].map(item => (
-            <div key={item.label} className={`glass-card ${item.bg} border p-4 text-center animate-bounce-in`}>
-              <span className="text-2xl">{item.icon}</span>
-              <p className={`text-3xl font-black ${item.text} mt-1`}>{item.value}</p>
-              <p className="text-xs font-semibold text-earth-500 mt-0.5">{item.label}</p>
-            </div>
-          ))}
+    <div className="animate-fade-in-up space-y-6 pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Carbon Wallet</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage, trade, and track your carbon credit ledger.</p>
         </div>
+        <button className="btn-primary">Connect Exchange</button>
+      </div>
 
-        {/* Total Value */}
-        <div className="glass-card bg-gradient-to-r from-leaf-50 to-sun-300/10 p-4 text-center border-leaf-200">
-          <p className="text-sm text-earth-500">Total Value</p>
-          <p className="text-3xl font-black text-earth-800">{wallet?.totalValue ?? '...'}</p>
-        </div>
-
-        {/* Chart */}
-        <div className="glass-card p-4">
-          <p className="text-sm font-bold text-earth-600 mb-3">📊 Credit Overview</p>
-          <ResponsiveContainer width="100%" height={160}>
-            <BarChart data={chartData}>
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#8f6430' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#8f6430' }} axisLine={false} tickLine={false} />
-              <Tooltip />
-              <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                {chartData.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Transaction Table */}
-        <div className="glass-card overflow-hidden">
-          <div className="p-4 border-b border-earth-100">
-            <p className="text-sm font-bold text-earth-600">📜 Transaction History</p>
-          </div>
-          <div className="divide-y divide-earth-50">
-            {transactions.map((tx, i) => (
-              <div key={tx.id} className="flex items-center gap-3 px-4 py-3 animate-slide-up" style={{ animationDelay: `${i * 50}ms` }}>
-                <span className="text-2xl">{tx.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-earth-800 truncate">{tx.description}</p>
-                  <p className="text-xs text-earth-400">
-                    {new Date(tx.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                </div>
-                <span className={`text-sm font-bold ${tx.credits > 0 ? 'text-leaf-600' : 'text-danger-500'}`}>
-                  {tx.credits > 0 ? '+' : ''}{tx.credits}
-                </span>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left Col: Balance & Chart */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="glass-panel p-6 border-agri-emerald/20 shadow-[0_0_30px_rgba(16,185,129,0.05)]">
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Estimated Value</p>
+            <h2 className="text-4xl font-black text-white mb-6">{wallet?.totalValue ?? '...'}</h2>
+            <div className="space-y-3 border-t border-white/5 pt-4">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-400">Available</span>
+                <span className="font-bold text-agri-emerald">{wallet?.earned ?? 0} Credits</span>
               </div>
-            ))}
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-400">Locked</span>
+                <span className="font-bold text-yellow-500">{wallet?.pending ?? 0} Credits</span>
+              </div>
+            </div>
           </div>
+          <div className="glass-panel p-6">
+            <p className="text-sm font-bold text-white mb-4">Distribution</p>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ left: -20 }}>
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ backgroundColor: '#111827', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white' }} />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                    {chartData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Col: Ledger */}
+        <div className="lg:col-span-3 glass-panel overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+            <h3 className="font-bold text-white text-lg">Transaction Ledger</h3>
+            <div className="flex gap-2">
+              <input type="text" placeholder="Search..." className="input-field py-1.5 min-w-[200px] text-sm" />
+              <button className="btn-secondary py-1.5 text-sm">Filter</button>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] uppercase tracking-widest text-gray-500">
+                  <th className="px-6 py-4 font-semibold">Date</th>
+                  <th className="px-6 py-4 font-semibold">Description</th>
+                  <th className="px-6 py-4 font-semibold">Type</th>
+                  <th className="px-6 py-4 font-semibold text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {transactions.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-white/[0.03] transition-colors">
+                    <td className="px-6 py-4 text-sm text-gray-400 font-mono">
+                      {new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-white font-medium">
+                      <span className="mr-2">{tx.icon}</span>{tx.description}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-block px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${
+                        tx.type === 'earned' ? 'bg-agri-emerald/20 text-agri-emerald border border-agri-emerald/30' :
+                        tx.type === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
+                        'bg-white/5 text-gray-400 border border-white/10'
+                      }`}>{tx.type}</span>
+                    </td>
+                    <td className={`px-6 py-4 text-sm font-bold text-right ${tx.credits > 0 ? 'text-agri-emerald' : 'text-white'}`}>
+                      {tx.credits > 0 ? '+' : ''}{tx.credits}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {transactions.length === 0 && <div className="p-12 text-center text-gray-600">No transactions recorded.</div>}
         </div>
       </div>
     </div>
