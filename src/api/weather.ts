@@ -45,7 +45,7 @@ export async function getAlerts(): Promise<Alert[]> {
 
   if (error) throw error;
   
-  return data.map(row => ({
+  return data.map((row: any) => ({
     id: row.id,
     type: row.type,
     severity: row.severity,

@@ -34,7 +34,7 @@ export async function getWeeklyPlan(): Promise<Recommendation[]> {
     .order('sort_order');
 
   if (error) throw error;
-  return data.map(mapRecommendation);
+  return data.map((row: any) => mapRecommendation(row));
 }
 
 export async function getSeasonalPlan(): Promise<Recommendation[]> {
@@ -45,7 +45,7 @@ export async function getSeasonalPlan(): Promise<Recommendation[]> {
     .order('sort_order');
 
   if (error) throw error;
-  return data.map(mapRecommendation);
+  return data.map((row: any) => mapRecommendation(row));
 }
 
 function mapRecommendation(row: any): Recommendation {

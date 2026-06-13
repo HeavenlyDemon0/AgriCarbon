@@ -10,7 +10,7 @@ export interface VerificationSubmission {
 export interface VerificationResult {
   success: boolean;
   message: string;
-  creditsAwarded: int;
+  creditsAwarded: number;
 }
 
 export const practiceTypes = [

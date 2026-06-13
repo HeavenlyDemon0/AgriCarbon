@@ -54,7 +54,7 @@ export async function getImpactData(): Promise<ImpactData[]> {
 
   if (error) throw error;
   
-  return data.map(item => ({
+  return data.map((item: any) => ({
     metric: item.metric,
     before: item.before_value,
     after: item.after_value,

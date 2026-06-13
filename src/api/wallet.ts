@@ -28,7 +28,7 @@ export async function getWalletData(): Promise<WalletData> {
   if (error) throw error;
 
   let earned = 0, pending = 0, redeemed = 0;
-  data.forEach(t => {
+  data.forEach((t: any) => {
     if (t.type === 'earned') earned += t.credits;
     else if (t.type === 'pending') pending += t.credits;
     else if (t.type === 'redeemed' || t.credits < 0) redeemed += Math.abs(t.credits);
@@ -54,7 +54,7 @@ export async function getTransactions(): Promise<Transaction[]> {
 
   if (error) throw error;
   
-  return data.map(row => ({
+  return data.map((row: any) => ({
     id: row.id,
     date: row.transaction_date,
     type: row.type,

@@ -20,7 +20,7 @@ export async function getReports(): Promise<Report[]> {
 
   if (error) throw error;
   
-  return data.map(row => ({
+  return data.map((row: any) => ({
     id: row.id,
     title: row.title,
     date: row.report_date,
