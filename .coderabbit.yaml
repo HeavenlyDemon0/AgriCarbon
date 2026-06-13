@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+
+reviews:
+  # Controls strictness: 'chill' (bugs only), 'assertive' (style + bugs), 'followup'
+  profile: "assertive"
+  
+  # Ensure CI/CD files are NOT excluded so they get reviewed
+  path_filters:
+    - "!**/*.lock"
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/coverage/**"
+    - "!**/*.generated.*"
+    - "!**/__snapshots__/**"
+    # Note: We do NOT exclude .github/workflows so CI configs are reviewed
+
+  # Optional: Specific instructions for CI/CD files
+  path_instructions:
+    - path: ".github/workflows/**"
+      instructions: |
+        Review this GitHub Actions workflow for:
+        - Security best practices (pin action versions by SHA, avoid pull_request_target risks)
+        - Efficiency (caching dependencies, matrix strategies)
+        - Correctness (valid YAML syntax, proper job dependencies)
+        - Resource usage (timeout limits, runner selection)
+
+  # Enable built-in linters to complement AI review
+  tools:
+    actionlint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+
+chat:
+  auto_reply: true   
