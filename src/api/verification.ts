@@ -1,4 +1,5 @@
-// ── Mock Verification API ──
+import { apiFetch } from './client';
+
 export interface VerificationSubmission {
   image: File | null;
   voiceConfirmed: boolean;
@@ -22,8 +23,20 @@ export const practiceTypes = [
   { value: 'other', label: 'Other', icon: '📋' },
 ];
 
-export async function submitVerification(_data: VerificationSubmission): Promise<VerificationResult> {
-  // Simulate network delay
-  await new Promise(r => setTimeout(r, 1500));
-  return { success: true, message: 'Practice verified successfully!', creditsAwarded: 3 };
+export async function submitVerification(
+  data: VerificationSubmission,
+): Promise<VerificationResult> {
+  if (!data.image) {
+    throw new Error('Image is required');
+  }
+
+  const form = new FormData();
+  form.append('image', data.image);
+  form.append('practice_type', data.practiceType);
+  form.append('voice_confirmed', String(data.voiceConfirmed));
+
+  return apiFetch<VerificationResult>('/verification', {
+    method: 'POST',
+    body: form,
+  });
 }
